@@ -1,0 +1,37 @@
+---
+import { type Car, carName, formatPrice } from '../data/cars';
+import { img, url } from '../data/site';
+
+interface Props { car: Car; eager?: boolean }
+const { car, eager = false } = Astro.props;
+const photo = (n: number, w: number) => img(`cars/${car.slug}/${String(n).padStart(2, '0')}-${w}.webp`);
+---
+<a
+  class="card"
+  href={url(`catalog/${car.slug}/`)}
+  data-brand={car.brand}
+  data-body={car.body}
+  data-status={car.status}
+>
+  <div class="card__media">
+    <img
+      src={photo(1, 800)}
+      srcset={`${photo(1, 800)} 800w, ${photo(1, 1600)} 1600w`}
+      sizes="(min-width: 1024px) 30vw, 50vw"
+      alt={`${carName(car)}, ${car.year}`}
+      loading={eager ? 'eager' : 'lazy'}
+      decoding="async"
+    />
+    <img src={photo(2, 800)} alt="" loading="lazy" decoding="async" aria-hidden="true" />
+    <span class="card__badge caps">{car.status}</span>
+    <span class="card__plus" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v16M4 12h16" /></svg>
+    </span>
+    <span class="card__dots" aria-hidden="true">{Array.from({ length: Math.min(car.photos, 4) }, () => <i />)}</span>
+  </div>
+  <div>
+    <div class="card__name">{carName(car)}</div>
+    <div class="card__meta">{car.year} · {car.power} л.с. · {car.body.toLowerCase()} · новый</div>
+    <div class="card__price">{formatPrice(car.price)}</div>
+  </div>
+</a>

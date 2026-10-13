@@ -1,0 +1,232 @@
+---
+import Base from '../layouts/Base.astro';
+import LogoMark from '../components/LogoMark.astro';
+import CarCard from '../components/CarCard.astro';
+import HeroSlider from '../components/HeroSlider';
+import { cars } from '../data/cars';
+import { img, site, url } from '../data/site';
+
+const services = [
+  {
+    title: 'В наличии в Москве',
+    text: 'Новые автомобили 2025–2026 годов, пробег до 30 км. Посмотреть и проехать – в шоуруме у ВТБ Арены.',
+  },
+  {
+    title: 'Под заказ по конфигуратору',
+    text: 'Комплектация, цвет, опции – как вам нужно. Заказ с завода, доставка из Европы и Кореи, растаможка.',
+  },
+  {
+    title: 'С НДС и в лизинг',
+    text: 'Работаем с физическими и юридическими лицами. Аккредитованы в ключевых банках и лизинговых компаниях.',
+  },
+  {
+    title: 'Трейд-ин и под ключ',
+    text: 'Примем ваш автомобиль в зачёт. Оклейка плёнкой, КАСКО, сезонные шины и красивые номера.',
+  },
+];
+---
+<Base
+  title="Community Dealer – премиальные автомобили в наличии и под заказ, Москва"
+  description="Mercedes-Benz, Porsche, Ferrari, Range Rover в наличии и под заказ по конфигуратору. Сделки с НДС, лизинг, трейд-ин. Шоурум у ВТБ Арены, Ленинградский проспект, 36 стр. 36."
+  page="home"
+>
+  <HeroSlider client:load labels={['Community', 'В наличии и под заказ']}>
+    <div slot="s1" class="hero-logo">
+      <div class="hero-logo__glow" aria-hidden="true"></div>
+      <div class="hero-logo__mark">
+        <LogoMark id="hero" title="Community" />
+        <span class="hero-logo__shine" aria-hidden="true" style={`--mark:url(${img('mark.svg')})`}></span>
+      </div>
+      <p class="hero-logo__word chrome">COMMUNITY</p>
+      <p class="hero-logo__sub caps">Dealer · Moscow</p>
+    </div>
+
+    <div slot="s2" class="hero-offer">
+      <picture class="hero-offer__bg">
+        <img
+          src={img('hero-headlight-1200.webp')}
+          srcset={`${img('hero-headlight-1200.webp')} 1200w, ${img('hero-headlight-2400.webp')} 2400w`}
+          sizes="100vw"
+          alt="Фара Porsche 911 Turbo S в цвете Malachite Green крупным планом"
+          fetchpriority="high"
+        />
+      </picture>
+      <div class="hero-offer__shade" aria-hidden="true"></div>
+      <div class="wrap hero-offer__inner">
+        <p class="caps hero-offer__eyebrow">Mercedes-Benz · Porsche · Ferrari · Range Rover</p>
+        <h1 class="hero-offer__title">Премиальные автомобили <span class="chrome">в наличии и под&nbsp;заказ</span></h1>
+        <p class="hero-offer__text">
+          Новые машины 2025–2026 годов в шоуруме у ВТБ Арены и любая комплектация по конфигуратору.
+          С НДС, в лизинг или в трейд-ин, оформление под ключ.
+        </p>
+        <div class="hero-offer__cta">
+          <a class="btn btn--solid" href={url('catalog/')}>Смотреть каталог</a>
+          <a class="btn" href={site.whatsapp} target="_blank" rel="noopener">Собрать под заказ</a>
+        </div>
+      </div>
+      <p class="hero-offer__credit caps">Porsche 911 Turbo S · Malachite Green · в наличии</p>
+    </div>
+  </HeroSlider>
+
+  <section class="section services" id="order">
+    <div class="wrap services__grid">
+      <div class="services__lead reveal">
+        <p class="caps section__eyebrow">Как мы работаем</p>
+        <h2 class="section__title">Найдём, соберём и&nbsp;привезём автомобиль под&nbsp;вас</h2>
+        <p class="services__text muted">
+          Community – не просто автосалон, а сообщество людей, которые любят машины. Мы отвечаем за весь путь: от выбора
+          комплектации до номеров на вашем автомобиле.
+        </p>
+        <div class="services__proof">
+          <span class="services__rating chrome">4,9</span>
+          <span class="muted">рейтинг на auto.ru<br />статус «Проверенный дилер»</span>
+        </div>
+      </div>
+      <ol class="services__list">
+        {services.map((s, i) => (
+          <li class="services__item reveal" style={`transition-delay:${i * 80}ms`}>
+            <span class="services__num caps">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{s.title}</h3>
+            <p class="muted">{s.text}</p>
+          </li>
+        ))}
+      </ol>
+    </div>
+  </section>
+
+  <section class="section stock">
+    <div class="wrap">
+      <div class="section__head reveal">
+        <div>
+          <p class="caps section__eyebrow">Каталог</p>
+          <h2 class="section__title">В наличии в Москве</h2>
+        </div>
+        <a class="link-arrow caps" href={url('catalog/')}>Весь каталог</a>
+      </div>
+      <div class="product-grid stock__grid">
+        {cars.map((car) => <div class="reveal"><CarCard car={car} /></div>)}
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style is:global>
+  /* ── первый экран ── */
+  .hero { position: relative; height: 100svh; min-height: 560px; overflow: hidden; background: #050606; }
+  .hero__slide {
+    position: absolute; inset: 0; opacity: 0; visibility: hidden;
+    transition: opacity 1.1s var(--ease), visibility 0s linear 1.1s;
+  }
+  .hero__slide.is-active { opacity: 1; visibility: visible; transition: opacity 1.1s var(--ease); }
+  /* Astro оборачивает слот в <astro-slot>, поэтому высоту задаём самим слайдам */
+  .hero-logo, .hero-offer { height: 100%; }
+
+  .hero__ui {
+    position: absolute; left: 0; right: 0; bottom: 0; z-index: 5;
+    display: flex; align-items: flex-end; justify-content: space-between; gap: 24px;
+    padding: 0 var(--gutter) clamp(22px, 4vh, 40px); max-width: var(--max); margin: 0 auto;
+  }
+  .hero__bars { display: flex; gap: clamp(16px, 3vw, 40px); }
+  .hero__bar { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; width: clamp(120px, 16vw, 220px); text-align: left; opacity: 0.55; transition: opacity 0.4s; }
+  .hero__bar.is-active, .hero__bar:hover { opacity: 1; }
+  .hero__bar-num { font: 400 12px/1 var(--f-display); }
+  .hero__bar-label { font-size: 12px; color: #c9cdcb; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .hero__bar-track { grid-column: 1 / -1; height: 1px; background: rgba(255, 255, 255, 0.22); overflow: hidden; }
+  .hero__bar-track i { display: block; height: 100%; width: 100%; background: #fff; transform: scaleX(0); transform-origin: left; }
+  .hero__bar.is-done .hero__bar-track i { transform: none; }
+  .hero__bar.is-active .hero__bar-track i { animation: heroBar var(--dur) linear forwards; animation-play-state: var(--play); }
+  @keyframes heroBar { to { transform: none; } }
+  .hero__arrows { display: flex; gap: 8px; }
+  .hero__arrows .icon-btn { width: 42px; height: 42px; background: rgba(11, 12, 12, 0.3); backdrop-filter: blur(6px); }
+
+  /* слайд 1: знак бренда */
+  .hero-logo { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 90px 16px 120px; }
+  .hero-logo__glow {
+    position: absolute; inset: 0; pointer-events: none;
+    background:
+      radial-gradient(60% 45% at 50% 100%, rgba(36, 73, 60, 0.55) 0%, transparent 70%),
+      radial-gradient(40% 40% at 50% 42%, rgba(255, 255, 255, 0.05) 0%, transparent 70%);
+  }
+  .hero-logo__mark { position: relative; width: clamp(110px, 15vh, 170px); aspect-ratio: 400 / 620; }
+  .hero-logo__mark svg { width: 100%; height: 100%; filter: drop-shadow(0 20px 60px rgba(255, 255, 255, 0.08)); }
+  /* блик бежит только по лентам знака: маска по форме логотипа */
+  .hero-logo__shine {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.95) 50%, transparent 62%) 0 0 / 300% 100% no-repeat;
+    background-position: 100% 0;
+    -webkit-mask: var(--mark) center / contain no-repeat;
+    mask: var(--mark) center / contain no-repeat;
+  }
+  .is-active .hero-logo__shine { animation: heroShine 3.6s var(--ease) 0.8s infinite; }
+  @keyframes heroShine { 0% { background-position: 100% 0; } 60%, 100% { background-position: 0 0; } }
+  .is-active .hero-logo__mark, .is-active .hero-logo__word, .is-active .hero-logo__sub { animation: heroRise 1.4s var(--ease) both; }
+  .is-active .hero-logo__word { animation-delay: 0.15s; }
+  .is-active .hero-logo__sub { animation-delay: 0.3s; }
+  @keyframes heroRise { from { opacity: 0; transform: translateY(18px); filter: blur(6px); } to { opacity: 1; transform: none; filter: none; } }
+  .hero-logo__word { position: relative; margin-top: clamp(28px, 5vh, 48px); font: 300 clamp(30px, 7.4vw, 104px)/1 var(--f-display); letter-spacing: 0.3em; padding-left: 0.3em; }
+  .hero-logo__sub { position: relative; margin-top: 22px; color: var(--muted); letter-spacing: 0.5em; padding-left: 0.5em; }
+
+  /* слайд 2: оффер на крупном плане фары */
+  .hero-offer { position: relative; display: flex; align-items: center; }
+  .hero-offer__bg { position: absolute; inset: 0; }
+  .hero-offer__bg img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 50%; transform: scale(1.02); }
+  .is-active .hero-offer__bg img { animation: heroZoom 14s linear forwards; }
+  @keyframes heroZoom { from { transform: scale(1.02); } to { transform: scale(1.2) translateX(-2%); } }
+  .hero-offer__shade {
+    position: absolute; inset: 0;
+    background:
+      linear-gradient(90deg, rgba(5, 6, 6, 0.92) 0%, rgba(5, 6, 6, 0.7) 34%, rgba(5, 6, 6, 0.05) 70%),
+      linear-gradient(0deg, rgba(5, 6, 6, 0.85) 0%, transparent 35%),
+      linear-gradient(180deg, rgba(5, 6, 6, 0.7) 0%, transparent 20%);
+  }
+  .hero-offer__inner { position: relative; padding-top: 80px; padding-bottom: 80px; }
+  .hero-offer__eyebrow { color: var(--accent); }
+  .hero-offer__title .chrome { display: block; }
+  @media (min-width: 861px) { .hero-offer__title .chrome { white-space: nowrap; } }
+  .hero-offer__title { max-width: 15em; margin-top: 22px; font-size: clamp(32px, 5.2vw, 72px); line-height: 1.05; }
+  .hero-offer__text { max-width: 31em; margin-top: 24px; color: #c3c9c6; font-size: clamp(14px, 1.2vw, 17px); }
+  .hero-offer__cta { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 36px; }
+  .is-active .hero-offer__inner > * { animation: heroRise 1.2s var(--ease) both; }
+  .is-active .hero-offer__inner > :nth-child(2) { animation-delay: 0.12s; }
+  .is-active .hero-offer__inner > :nth-child(3) { animation-delay: 0.24s; }
+  .is-active .hero-offer__inner > :nth-child(4) { animation-delay: 0.36s; }
+  .hero-offer__credit { position: absolute; right: var(--gutter); top: 130px; color: rgba(255, 255, 255, 0.55); writing-mode: vertical-rl; letter-spacing: 0.24em; }
+
+  @media (max-width: 860px) {
+    .hero__ui { align-items: flex-end; gap: 16px; }
+    .hero__bars { flex: 1; justify-content: space-between; gap: 16px; }
+    .hero__bar { width: auto; flex: 1; }
+    .hero__nav { display: none; }
+    .hero__arrows .icon-btn { width: 36px; height: 36px; }
+    .hero-offer { align-items: flex-end; }
+    .hero-offer__bg img { object-position: 70% 50%; }
+    .hero-offer__shade { background: linear-gradient(0deg, rgba(5, 6, 6, 0.96) 0%, rgba(5, 6, 6, 0.75) 48%, rgba(5, 6, 6, 0.1) 80%); }
+    .hero-offer__inner { padding-bottom: 120px; }
+    .hero-offer__eyebrow { letter-spacing: 0.1em; font-size: 10px; }
+    .hero-offer__cta { display: grid; grid-template-columns: 1fr; }
+    .hero-offer__cta .btn { width: 100%; }
+    .hero-offer__credit { display: none; }
+  }
+
+  /* ── блок 2: как работаем ── */
+  .services { background: linear-gradient(180deg, var(--bg) 0%, var(--bg-2) 100%); }
+  .services__grid { display: grid; grid-template-columns: 1fr; gap: 48px; }
+  .services__text { margin-top: 24px; max-width: 34em; }
+  .services__proof { display: flex; align-items: center; gap: 18px; margin-top: 40px; font-size: 13px; line-height: 1.5; }
+  .services__rating { font: 300 56px/1 var(--f-display); }
+  .services__list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr; border-top: 1px solid var(--line); }
+  .services__item { padding: 28px 0; border-bottom: 1px solid var(--line); display: grid; grid-template-columns: 52px 1fr; gap: 6px 16px; }
+  .services__item h3 { font-size: 17px; font-weight: 400; line-height: 1.3; }
+  .services__item p { grid-column: 2; font-size: 14px; }
+  .services__num { color: var(--accent); padding-top: 4px; }
+  @media (min-width: 1024px) {
+    .services__grid { grid-template-columns: 5fr 7fr; gap: 80px; align-items: start; }
+    .services__lead { position: sticky; top: 140px; }
+    .services__list { grid-template-columns: 1fr 1fr; border-top: 0; gap: 0 40px; }
+    .services__item { grid-template-columns: 1fr; padding: 36px 0; border-top: 1px solid var(--line); border-bottom: 0; }
+    .services__item p { grid-column: 1; }
+    .services__item h3 { font-size: 20px; margin-top: 18px; }
+  }
+
+  .stock { padding-top: 40px; }
+</style>

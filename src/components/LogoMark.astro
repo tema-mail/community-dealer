@@ -1,0 +1,29 @@
+---
+// Знак Community: три вложенные «U» из хромированных лент (перерисовано в вектор с аватара бренда).
+interface Props { id: string; class?: string; title?: string }
+const { id, class: cls, title } = Astro.props;
+const g = `cm-${id}`;
+// левая половина; правая – зеркальная копия
+const strips = [
+  'M58 50 L95 86 L95 380 C95 500 160 590 232 628 C140 604 58 520 58 380 Z',
+  'M114 108 L148 142 L148 380 C148 492 185 572 226 604 C162 584 114 500 114 380 Z',
+  'M168 165 L195 194 L195 380 C195 468 214 532 240 566 C196 548 168 480 168 380 Z',
+];
+---
+<svg class={cls} viewBox="40 30 400 620" role={title ? 'img' : undefined} aria-hidden={title ? undefined : 'true'} aria-label={title}>
+  <defs>
+    <linearGradient id={g} gradientUnits="userSpaceOnUse" x1="0" y1="40" x2="0" y2="640">
+      <stop offset="0" stop-color="#ffffff" />
+      <stop offset=".32" stop-color="#e4e6e5" />
+      <stop offset=".56" stop-color="#5c605e" />
+      <stop offset=".8" stop-color="#c9cccb" />
+      <stop offset="1" stop-color="#3b3e3d" />
+    </linearGradient>
+  </defs>
+  <g fill={`url(#${g})`}>
+    {strips.map((d) => <path d={d} />)}
+    <g transform="translate(480 0) scale(-1 1)">
+      {strips.map((d) => <path d={d} />)}
+    </g>
+  </g>
+</svg>

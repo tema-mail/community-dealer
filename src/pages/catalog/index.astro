@@ -1,0 +1,147 @@
+---
+import Base from '../../layouts/Base.astro';
+import CarCard from '../../components/CarCard.astro';
+import { cars, brands, bodies } from '../../data/cars';
+import { img, site, url } from '../../data/site';
+
+const filters = [
+  { key: 'brand', title: 'Марка', values: brands },
+  { key: 'body', title: 'Кузов', values: bodies },
+  { key: 'status', title: 'Наличие', values: ['В наличии', 'Под заказ'] },
+];
+---
+<Base
+  title="Каталог автомобилей в наличии – Community Dealer, Москва"
+  description="Ferrari, Mercedes-AMG, Porsche в наличии в Москве: цены, характеристики и опции. Сделки с НДС, лизинг, трейд-ин."
+  page="catalog"
+  solidHeader
+>
+  <section class="cat-hero">
+    <div class="wrap">
+      <a class="cat-hero__back" href={url()}>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M15 5l-7 7 7 7" /></svg>
+        На главную
+      </a>
+      <h1 class="cat-hero__title">Автомобили</h1>
+      <p class="cat-hero__sub muted">Новые машины в наличии в Москве и любая комплектация под заказ по конфигуратору</p>
+    </div>
+  </section>
+
+  <div class="wrap cat">
+    <aside class="cat__side" aria-label="Фильтр каталога">
+      {filters.map((f) => (
+        <div class="cat__group" data-filter={f.key}>
+          <p class="cat__group-title">{f.title}</p>
+          <div class="cat__chips">
+            <button type="button" class="cat__chip is-on" data-value="" aria-pressed="true">Все</button>
+            {f.values.map((v) => (
+              <button type="button" class="cat__chip" data-value={v} aria-pressed="false">{v}</button>
+            ))}
+          </div>
+        </div>
+      ))}
+      <p class="cat__count muted" aria-live="polite" data-count>{cars.length} автомобиля</p>
+    </aside>
+
+    <div class="cat__main">
+      <a class="cat-banner" href={site.whatsapp} target="_blank" rel="noopener">
+        <img src={img('cars/mercedes-amg-g63/09-1600.webp')} alt="" loading="eager" />
+        <div class="cat-banner__text">
+          <p class="cat-banner__title">Под заказ по конфигуратору</p>
+          <p class="cat-banner__sub">Соберём комплектацию, цвет и опции под вас</p>
+          <span class="caps cat-banner__more">Подробнее</span>
+        </div>
+      </a>
+
+      <div class="product-grid" data-grid>
+        {cars.map((car, i) => <CarCard car={car} eager={i < 2} />)}
+        <a class="card card--cta" href={site.whatsapp} target="_blank" rel="noopener" data-cta>
+          <div class="card__media">
+            <div>
+              <h3>Не нашли свою машину?</h3>
+              <p>В пути и на заказе есть ещё G-Класс, S-Класс, Maybach, Range Rover. Подберём и соберём под вас.</p>
+            </div>
+            <span class="caps">Написать менеджеру</span>
+          </div>
+        </a>
+      </div>
+      <p class="cat__empty muted" hidden data-empty>По этим условиям сейчас нет машин в наличии – соберём под заказ.</p>
+    </div>
+  </div>
+</Base>
+
+<script>
+  const state: Record<string, string> = {};
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-grid] .card:not([data-cta])')];
+  const count = document.querySelector('[data-count]');
+  const empty = document.querySelector<HTMLElement>('[data-empty]');
+  const plural = (n: number) =>
+    n % 10 === 1 && n % 100 !== 11 ? 'автомобиль' : [2, 3, 4].includes(n % 10) && ![12, 13, 14].includes(n % 100) ? 'автомобиля' : 'автомобилей';
+
+  document.querySelectorAll<HTMLElement>('[data-filter]').forEach((group) => {
+    const key = group.dataset.filter!;
+    group.querySelectorAll<HTMLButtonElement>('.cat__chip').forEach((chip) =>
+      chip.addEventListener('click', () => {
+        state[key] = chip.dataset.value ?? '';
+        group.querySelectorAll('.cat__chip').forEach((c) => {
+          c.classList.toggle('is-on', c === chip);
+          c.setAttribute('aria-pressed', String(c === chip));
+        });
+        let shown = 0;
+        cards.forEach((card) => {
+          const ok = Object.entries(state).every(([k, v]) => !v || card.dataset[k] === v);
+          card.hidden = !ok;
+          if (ok) shown++;
+        });
+        if (count) count.textContent = `${shown} ${plural(shown)}`;
+        if (empty) empty.hidden = shown > 0;
+      }),
+    );
+  });
+</script>
+
+<style>
+  .cat-hero { padding: 150px 0 48px; text-align: center; background: radial-gradient(60% 120% at 50% 0%, var(--green) 0%, transparent 70%); }
+  .cat-hero .wrap { position: relative; }
+  .cat-hero__back { position: absolute; left: var(--gutter); top: -40px; display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .cat-hero__back svg { width: 14px; height: 14px; }
+  .cat-hero__back:hover { color: var(--text); }
+  .cat-hero__title { font-size: clamp(30px, 4vw, 52px); }
+  .cat-hero__sub { max-width: 30em; margin: 16px auto 0; font-size: 14px; }
+
+  .cat { display: grid; grid-template-columns: 1fr; gap: 28px; padding-bottom: 120px; }
+  .cat__group { padding-bottom: 18px; }
+  .cat__group-title { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+  .cat__chips { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin: 0 calc(-1 * var(--gutter)); padding: 0 var(--gutter); }
+  .cat__chips::-webkit-scrollbar { display: none; }
+  .cat__chip {
+    flex: none; height: 34px; padding: 0 16px; border-radius: 999px; border: 1px solid var(--line-2);
+    font-size: 13px; color: #c9cdcb; transition: all 0.25s var(--ease);
+  }
+  .cat__chip:hover { border-color: var(--text); color: var(--text); }
+  .cat__chip.is-on { background: var(--green-2); border-color: var(--green-2); color: #fff; }
+  .cat__count { font-size: 12px; }
+  .cat__empty { padding: 40px 0; }
+
+  .cat-banner { position: relative; display: flex; align-items: center; min-height: 150px; border-radius: var(--radius); overflow: hidden; margin-bottom: 36px; background: var(--card); }
+  .cat-banner img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; opacity: 0.55; transition: transform 1.2s var(--ease); }
+  .cat-banner::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgba(11, 12, 12, 0.95) 20%, rgba(23, 50, 42, 0.5) 70%, transparent); }
+  .cat-banner:hover img { transform: scale(1.04); }
+  .cat-banner__text { position: relative; z-index: 2; padding: 28px clamp(20px, 3vw, 36px); }
+  .cat-banner__title { font: 300 clamp(18px, 2vw, 24px)/1.2 var(--f-display); }
+  .cat-banner__sub { margin-top: 8px; font-size: 13px; color: #b9c2be; }
+  .cat-banner__more { display: inline-block; margin-top: 22px; color: var(--muted); }
+
+  @media (min-width: 1024px) {
+    .cat { grid-template-columns: 220px 1fr; gap: 56px; }
+    .cat__side { position: sticky; top: 130px; align-self: start; padding-top: 6px; }
+    .cat__group { border-bottom: 1px solid var(--line); padding: 18px 0 22px; }
+    .cat__group:first-child { padding-top: 0; }
+    .cat__group-title { font-size: 13px; color: var(--text); margin-bottom: 14px; }
+    .cat__chips { flex-direction: column; align-items: flex-start; gap: 2px; margin: 0; padding: 0; overflow: visible; }
+    .cat__chip { height: auto; padding: 5px 0; border: 0; border-radius: 0; color: var(--muted); }
+    .cat__chip:hover { color: var(--text); }
+    .cat__chip.is-on { background: none; color: var(--accent); }
+    .cat__count { padding-top: 18px; }
+  }
+</style>
