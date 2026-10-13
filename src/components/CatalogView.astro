@@ -1,6 +1,6 @@
 ---
 // Общий вид каталога (по мотивам bork.ru): слева каталоги по кузову и маркам, сверху фильтр и сортировка,
-// в конце сетки – приглашение в Telegram, где весь склад.
+// в конце сетки – приглашение в Telegram, где полный каталог.
 import CarCard from './CarCard.astro';
 import { type Car, bodyCatalogs, brandCatalogs, cars as allCars, carsWord, photo } from '../data/cars';
 import { site, url } from '../data/site';
@@ -92,9 +92,9 @@ const cover = cars[0];
           {cover && <img class="card--cta__bg" src={photo(cover, 2, 800)} alt="" loading="lazy" />}
           <div>
             <h3>Не нашли свою машину?</h3>
-            <p>Весь склад, машины в пути и закрытые предложения – в нашем Telegram. Новинки там появляются первыми.</p>
+            <p>Полный каталог, машины в пути и закрытые предложения – в нашем Telegram. Новинки там появляются первыми.</p>
           </div>
-          <span class="caps">Открыть Telegram</span>
+          <span class="btn btn--tg card--cta__btn">Открыть Telegram</span>
         </div>
       </a>
     </div>
@@ -185,6 +185,8 @@ const cover = cars[0];
   .cat__empty { padding: 40px 0; }
   @media (max-width: 1023px) { .cat__group--all { display: none; } }
   @media (min-width: 1024px) { .cat__link--mobile { display: none !important; } }
+  .card--cta__btn { align-self: flex-start; min-height: 42px; }
+  @media (min-width: 1024px) { .card--cta__btn { align-self: flex-end; flex: none; } }
   .card--cta__bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0.18; mix-blend-mode: luminosity; }
   .card--cta .card__media > div, .card--cta .card__media > span { position: relative; }
 

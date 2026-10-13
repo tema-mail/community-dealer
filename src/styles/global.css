@@ -63,6 +63,20 @@ p { margin: 0; }
 .btn--solid { background: var(--text); color: #0b0c0c; border-color: var(--text); }
 .btn--solid:hover { background: #fff; }
 .btn--green { background: var(--green-2); border-color: var(--green-2); }
+/* Telegram: при наведении и нажатии загорается изумрудным со свечением */
+.btn--tg { position: relative; overflow: hidden; isolation: isolate; transition: background 0.35s var(--ease), border-color 0.35s var(--ease), color 0.35s var(--ease), box-shadow 0.45s var(--ease), transform 0.35s var(--ease); }
+.btn--tg::after {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none; opacity: 0;
+  background: linear-gradient(105deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%) -100% 0 / 200% 100% no-repeat;
+}
+.btn--tg:hover, .btn--tg:focus-visible, .btn--tg:active, .card:hover .btn--tg {
+  background: linear-gradient(135deg, #17694d 0%, #23a874 50%, #4fe0a2 100%); border-color: #4fe0a2; color: #fff;
+  box-shadow: 0 0 0 1px rgba(79, 224, 162, 0.4), 0 10px 36px rgba(35, 168, 116, 0.55), 0 0 90px rgba(79, 224, 162, 0.3);
+  transform: translateY(-1px);
+}
+.btn--tg:hover::after, .btn--tg:focus-visible::after, .card:hover .btn--tg::after { opacity: 1; animation: tgSheen 1.1s var(--ease) both; }
+.btn--tg:active { transform: translateY(0) scale(0.98); }
+@keyframes tgSheen { to { background-position: 200% 0; } }
 .btn--green:hover { background: #2e5a4a; border-color: #2e5a4a; }
 
 /* ── шапка ── */
