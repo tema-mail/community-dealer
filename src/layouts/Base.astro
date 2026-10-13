@@ -1,6 +1,8 @@
 ---
 import '../styles/global.css';
 import LogoMark from '../components/LogoMark.astro';
+import Modals from '../components/Modals.astro';
+import { bodyCatalogs, brandCatalogs, cars } from '../data/cars';
 import { site, url } from '../data/site';
 
 interface Props {
@@ -14,7 +16,6 @@ const { title, description, solidHeader = false, page } = Astro.props;
 const noindex = import.meta.env.PUBLIC_NOINDEX === '1';
 const canonical = new URL(Astro.url.pathname, Astro.site);
 const nav = [
-  { href: url('catalog/'), label: 'Каталог', current: page === 'catalog' || page === 'car' },
   { href: url('#order'), label: 'Под заказ' },
   { href: url('#order'), label: 'Трейд-ин' },
   { href: '#contacts', label: 'Контакты' },
@@ -61,13 +62,28 @@ const nav = [
             <a class="icon-btn" href={site.phoneHref} aria-label="Позвонить" style="display:none" data-mobile-call>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2Z" /></svg>
             </a>
-            <button class="icon-btn header__burger" type="button" aria-label="Меню" aria-expanded="false" data-burger>
+            <button class="icon-btn header__burger" type="button" aria-label="Меню" aria-expanded="false" data-burger aria-controls="site-nav">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M4 8h16M4 16h16" /></svg>
             </button>
           </div>
         </div>
-        <nav class="header__nav" aria-label="Основное меню">
-          {nav.map((n) => <a href={n.href} aria-current={n.current ? 'page' : undefined}>{n.label}</a>)}
+        <nav class="header__nav" id="site-nav" aria-label="Основное меню">
+          <div class="drop">
+            <a href={url('catalog/')} aria-current={page === 'catalog' || page === 'car' ? 'page' : undefined}>Каталог</a>
+            <div class="drop__panel">
+              <div class="drop__col">
+                <p class="drop__title">Кузов</p>
+                {bodyCatalogs.map((c) => <a href={url(`catalog/${c.slug}/`)}>{c.title} <i>{c.cars.length}</i></a>)}
+              </div>
+              <div class="drop__col">
+                <p class="drop__title">Марка</p>
+                {brandCatalogs.map((c) => <a href={url(`catalog/${c.slug}/`)}>{c.title} <i>{c.cars.length}</i></a>)}
+              </div>
+              <a class="drop__all" href={url('catalog/')}>Все автомобили <i>{cars.length}</i></a>
+            </div>
+          </div>
+          {nav.map((n) => <a href={n.href}>{n.label}</a>)}
+          <button type="button" class="header__lead" data-lead="">Записаться на просмотр</button>
         </nav>
       </div>
     </header>
@@ -87,19 +103,23 @@ const nav = [
         </div>
         <div class="footer__grid">
           <div>
-            <h4>Автомобили</h4>
-            <a href={url('catalog/')}>Каталог в наличии</a>
-            <a href={url('#order')}>Под заказ по конфигуратору</a>
-            <a href={site.autoru} target="_blank" rel="noopener">Все объявления на auto.ru</a>
+            <p class="footer__h">Каталог</p>
+            <a href={url('catalog/')}>Все автомобили</a>
+            {bodyCatalogs.map((c) => <a href={url(`catalog/${c.slug}/`)}>{c.title}</a>)}
           </div>
           <div>
-            <h4>Услуги</h4>
+            <p class="footer__h">Марки</p>
+            {brandCatalogs.map((c) => <a href={url(`catalog/${c.slug}/`)}>{c.title}</a>)}
+          </div>
+          <div>
+            <p class="footer__h">Услуги</p>
             <a href={url('#order')}>Сделки с НДС и лизинг</a>
             <a href={url('#order')}>Трейд-ин и выкуп</a>
             <a href={url('#order')}>Страхование и оформление</a>
           </div>
           <div>
-            <h4>Шоурум</h4>
+            <p class="footer__h">Шоурум</p>
+            <a href={site.autoru} target="_blank" rel="noopener">Мы на auto.ru</a>
             <p>{site.address}</p>
             <p>{site.place}</p>
             <p>{site.hours}</p>
@@ -107,10 +127,12 @@ const nav = [
         </div>
         <div class="footer__bottom">
           <span class="footer__brand"><LogoMark id="ftr" /> © 2026 Community Dealer</span>
-          <span>Цены указаны за наличный расчёт. Не является публичной офертой.</span>
+          <span><a href={url('politika/')}>Политика обработки персональных данных</a> · Цены за наличный расчёт, не оферта</span>
         </div>
       </div>
     </footer>
+
+    <Modals />
 
     <script>
       const header = document.querySelector<HTMLElement>('[data-header]');
@@ -123,7 +145,7 @@ const nav = [
         const open = header?.classList.toggle('is-open') ?? false;
         burger.setAttribute('aria-expanded', String(open));
       });
-      header?.querySelectorAll('.header__nav a').forEach((a) =>
+      header?.querySelectorAll('.header__nav a, .header__lead').forEach((a) =>
         a.addEventListener('click', () => header.classList.remove('is-open')),
       );
       const mq = window.matchMedia('(max-width: 860px)');

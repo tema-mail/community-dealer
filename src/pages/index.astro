@@ -3,8 +3,18 @@ import Base from '../layouts/Base.astro';
 import LogoMark from '../components/LogoMark.astro';
 import CarCard from '../components/CarCard.astro';
 import HeroSlider from '../components/HeroSlider';
-import { cars } from '../data/cars';
+import { bodyCatalogs, brandCatalogs, cars, carsWord, photo } from '../data/cars';
 import { img, site, url } from '../data/site';
+
+// обложки плиток каталогов: самые выразительные кадры склада
+const covers: Record<string, string> = {
+  vnedorozhniki: '1133160702',
+  sedany: '1160171691',
+  miniveny: '1131452664',
+  sportkary: '1131544969',
+};
+// подборка на главной: по самой дорогой машине каждой марки
+const picks = brandCatalogs.map((b) => b.cars[0]);
 
 const services = [
   {
@@ -98,13 +108,41 @@ const services = [
     <div class="wrap">
       <div class="section__head reveal">
         <div>
-          <p class="caps section__eyebrow">Каталог</p>
+          <p class="caps section__eyebrow">Каталог · {cars.length} {carsWord(cars.length)}</p>
           <h2 class="section__title">В наличии в Москве</h2>
         </div>
         <a class="link-arrow caps" href={url('catalog/')}>Весь каталог</a>
       </div>
+
+      <div class="tiles">
+        {bodyCatalogs.map((c, i) => {
+          const cover = cars.find((x) => x.id === covers[c.slug]) ?? c.cars[0];
+          return (
+            <a class="tile reveal" href={url(`catalog/${c.slug}/`)} style={`transition-delay:${i * 70}ms`}>
+              <img src={photo(cover, 1, 800)} alt="" loading="lazy" decoding="async" />
+              <span class="tile__text">
+                <span class="tile__title">{c.title}</span>
+                <span class="tile__count">{c.cars.length} {carsWord(c.cars.length)}</span>
+              </span>
+              <span class="tile__arrow" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
+              </span>
+            </a>
+          );
+        })}
+      </div>
+
+      <div class="brands reveal">
+        {brandCatalogs.map((b) => (
+          <a class="brands__item" href={url(`catalog/${b.slug}/`)}>{b.title}<i>{b.cars.length}</i></a>
+        ))}
+      </div>
+
       <div class="product-grid stock__grid">
-        {cars.map((car) => <div class="reveal"><CarCard car={car} /></div>)}
+        {picks.map((car) => <div class="reveal"><CarCard car={car} /></div>)}
+      </div>
+      <div class="stock__more reveal">
+        <a class="btn" href={url('catalog/')}>Смотреть все {cars.length} {carsWord(cars.length)}</a>
       </div>
     </div>
   </section>
@@ -229,4 +267,22 @@ const services = [
   }
 
   .stock { padding-top: 40px; }
+  .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+  .tile { position: relative; display: block; aspect-ratio: 4 / 5; border-radius: var(--radius); overflow: hidden; background: var(--card); }
+  .tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease); }
+  .tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(5, 6, 6, 0.85) 0%, rgba(5, 6, 6, 0.1) 55%); }
+  .tile:hover img { transform: scale(1.05); }
+  .tile__text { position: absolute; left: 16px; right: 56px; bottom: 16px; z-index: 1; display: grid; gap: 4px; }
+  .tile__title { font: 300 clamp(17px, 1.8vw, 24px)/1.15 var(--f-display); }
+  .tile__count { font-size: 12px; color: #b9c2be; }
+  .tile__arrow { position: absolute; right: 16px; bottom: 16px; z-index: 1; width: 34px; height: 34px; border-radius: 50%; display: grid; place-items: center; border: 1px solid rgba(255, 255, 255, 0.3); transition: background 0.3s, color 0.3s; }
+  .tile__arrow svg { width: 15px; height: 15px; }
+  .tile:hover .tile__arrow { background: var(--text); color: #0b0c0c; }
+  .brands { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 10px; margin: 36px 0 56px; }
+  .brands__item { display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 20px; border-radius: 999px; border: 1px solid var(--line-2); font-size: 14px; transition: all 0.25s var(--ease); }
+  .brands__item i { font-style: normal; font-size: 11px; color: var(--dim); }
+  .brands__item:hover { background: var(--green-2); border-color: var(--green-2); }
+  .brands__item:hover i { color: #b9d8c9; }
+  .stock__more { display: flex; justify-content: center; margin-top: 48px; }
+  @media (min-width: 1024px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; } .tile { aspect-ratio: 3 / 4; } }
 </style>

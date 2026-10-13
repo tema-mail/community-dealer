@@ -1,0 +1,297 @@
+---
+// Заявка «Записаться на просмотр» и два поп-апа с приглашением в Telegram (через 10 секунд и при уходе).
+// Нативные <dialog> + небольшой скрипт: состояния у окон нет, гидратация острова не нужна.
+// Приёмник заявок задаётся PUBLIC_LEAD_ENDPOINT (POST JSON). Пока его нет – заявка уходит в WhatsApp готовым сообщением.
+import LogoMark from './LogoMark.astro';
+import { site, url } from '../data/site';
+
+const endpoint = import.meta.env.PUBLIC_LEAD_ENDPOINT ?? '';
+---
+<dialog class="modal modal--lead" id="lead-modal" aria-labelledby="lead-title" data-endpoint={endpoint} data-whatsapp={site.whatsapp}>
+  <div class="modal__glow" aria-hidden="true"></div>
+  <button type="button" class="modal__close" data-close aria-label="Закрыть">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6 6 18" /></svg>
+  </button>
+
+  <form class="lead" data-lead-form novalidate>
+    <div class="modal__logo"><LogoMark id="lead" /></div>
+    <p class="caps modal__eyebrow">Шоурум у ВТБ Арены</p>
+    <h2 class="modal__title" id="lead-title">Запись на&nbsp;просмотр</h2>
+    <p class="lead__car" data-lead-car hidden></p>
+    <p class="modal__text">Покажем автомобиль, дадим проехать и посчитаем сделку: с НДС, в лизинг или с зачётом вашей машины.</p>
+
+    <label class="field">
+      <span>Как к вам обращаться</span>
+      <input name="name" autocomplete="name" placeholder="Имя" required maxlength="60" />
+    </label>
+    <label class="field">
+      <span>Телефон</span>
+      <input name="phone" type="tel" inputmode="tel" autocomplete="tel" placeholder="+7 (___) ___-__-__" required data-phone />
+    </label>
+
+    <fieldset class="chips">
+      <legend>Когда удобно приехать</legend>
+      {['Сегодня', 'Завтра', 'На выходных', 'Обсудим по телефону'].map((v, i) => (
+        <label><input type="radio" name="when" value={v} checked={i === 0} /><span>{v}</span></label>
+      ))}
+    </fieldset>
+    <fieldset class="chips">
+      <legend>Как связаться</legend>
+      {['Звонок', 'WhatsApp', 'Telegram'].map((v, i) => (
+        <label><input type="radio" name="contact" value={v} checked={i === 0} /><span>{v}</span></label>
+      ))}
+    </fieldset>
+    <input type="hidden" name="car" />
+
+    <label class="consent">
+      <input type="checkbox" name="consent" required />
+      <span>Согласен на <a href={url('politika/')} target="_blank">обработку персональных данных</a></span>
+    </label>
+    <p class="lead__error" data-lead-error hidden></p>
+    <button type="submit" class="btn btn--solid lead__submit">Записаться</button>
+    <p class="lead__note muted">Отвечаем ежедневно с 10:00 до 21:00</p>
+  </form>
+
+  <div class="lead__done" data-lead-done hidden>
+    <div class="modal__logo"><LogoMark id="lead-done" /></div>
+    <p class="caps modal__eyebrow" data-done-eyebrow>Заявка готова</p>
+    <h2 class="modal__title" id="lead-done-title" data-done-title tabindex="-1">Остался один шаг</h2>
+    <p class="modal__text" data-done-text>Отправьте заявку менеджеру в WhatsApp – сообщение уже заполнено.</p>
+    <a class="btn btn--solid lead__submit" data-done-wa target="_blank" rel="noopener">Отправить в WhatsApp</a>
+    <a class="btn lead__submit" href={site.phoneHref}>Или позвоните: {site.phone}</a>
+  </div>
+</dialog>
+
+<dialog class="modal modal--tg" id="tg-timer" aria-labelledby="tg-timer-title">
+  <div class="modal__glow" aria-hidden="true"></div>
+  <button type="button" class="modal__close" data-close aria-label="Закрыть">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6 6 18" /></svg>
+  </button>
+  <div class="modal__logo modal__logo--big"><LogoMark id="tg1" /><span class="modal__shine" aria-hidden="true" style={`--mark:url(${url('img/mark.svg')})`}></span></div>
+  <p class="caps modal__eyebrow">Community в Telegram</p>
+  <h2 class="modal__title" id="tg-timer-title">Весь склад – в&nbsp;нашем Telegram</h2>
+  <p class="modal__text">В канале новые машины появляются раньше, чем на сайте. Там же – машины в пути и закрытые предложения.</p>
+  <ul class="modal__list">
+    <li>Новые поступления – первыми, с ценой и опциями</li>
+    <li>Видеообзоры и разборы машин</li>
+    <li>Снижения цен и предложения не для открытого доступа</li>
+  </ul>
+  <a class="btn btn--solid modal__cta" href={site.telegram} target="_blank" rel="noopener" data-close-after>
+    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M21.4 4.3 2.9 11.4c-1 .4-1 1.6 0 1.9l4.6 1.5 1.8 5.6c.2.7 1.1.9 1.6.4l2.6-2.4 4.6 3.4c.6.4 1.4.1 1.6-.6l3-15.4c.2-1-.7-1.8-1.7-1.5ZM9.6 14.4l-.4 3.6-1.3-4 8.9-6.3-7.2 6.7Z" /></svg>
+    Подписаться в Telegram
+  </a>
+  <button type="button" class="modal__later" data-close>Продолжить на сайте</button>
+</dialog>
+
+<dialog class="modal modal--tg" id="tg-exit" aria-labelledby="tg-exit-title">
+  <div class="modal__glow" aria-hidden="true"></div>
+  <button type="button" class="modal__close" data-close aria-label="Закрыть">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6 6 18" /></svg>
+  </button>
+  <div class="modal__logo modal__logo--big"><LogoMark id="tg2" /><span class="modal__shine" aria-hidden="true" style={`--mark:url(${url('img/mark.svg')})`}></span></div>
+  <p class="caps modal__eyebrow">Уже уходите?</p>
+  <h2 class="modal__title" id="tg-exit-title">Не нашли свою машину?</h2>
+  <p class="modal__text">
+    Полный каталог – в нашем Telegram: машины в наличии, в пути и под заказ. Подпишитесь, чтобы первыми видеть новинки и видеоразборы,
+    или напишите – соберём автомобиль под вас.
+  </p>
+  <a class="btn btn--solid modal__cta" href={site.telegram} target="_blank" rel="noopener" data-close-after>
+    <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M21.4 4.3 2.9 11.4c-1 .4-1 1.6 0 1.9l4.6 1.5 1.8 5.6c.2.7 1.1.9 1.6.4l2.6-2.4 4.6 3.4c.6.4 1.4.1 1.6-.6l3-15.4c.2-1-.7-1.8-1.7-1.5ZM9.6 14.4l-.4 3.6-1.3-4 8.9-6.3-7.2 6.7Z" /></svg>
+    Смотреть полный каталог
+  </a>
+  <a class="btn modal__cta" href={site.whatsapp} target="_blank" rel="noopener" data-close-after>Написать менеджеру</a>
+</dialog>
+
+<script>
+  const $ = <T extends Element>(s: string, root: ParentNode = document) => root.querySelector<T>(s);
+  const store = {
+    get: (k: string) => { try { return sessionStorage.getItem(k); } catch { return null; } },
+    set: (k: string) => { try { sessionStorage.setItem(k, '1'); } catch { /* приватный режим */ } },
+  };
+  const anyOpen = () => !!document.querySelector('dialog[open]');
+
+  // закрытие: крестик, «позже», клик по фону
+  document.querySelectorAll<HTMLDialogElement>('dialog.modal').forEach((d) => {
+    d.addEventListener('click', (e) => {
+      const t = e.target as HTMLElement;
+      const r = d.getBoundingClientRect();
+      const outside = t === d && (e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom);
+      if (outside || t.closest('[data-close]')) d.close();
+      if (t.closest('[data-close-after]')) setTimeout(() => d.close(), 50);
+    });
+  });
+
+  // ── заявка ──
+  const lead = $<HTMLDialogElement>('#lead-modal')!;
+  const form = $<HTMLFormElement>('[data-lead-form]', lead)!;
+  const done = $<HTMLElement>('[data-lead-done]', lead)!;
+  const carLine = $<HTMLElement>('[data-lead-car]', lead)!;
+  const err = $<HTMLElement>('[data-lead-error]', lead)!;
+
+  document.addEventListener('click', (e) => {
+    const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-lead]');
+    if (!btn) return;
+    e.preventDefault();
+    const car = btn.dataset.lead ?? '';
+    form.elements.namedItem('car') && ((form.elements.namedItem('car') as HTMLInputElement).value = car);
+    carLine.textContent = car;
+    carLine.hidden = !car;
+    form.hidden = false;
+    done.hidden = true;
+    err.hidden = true;
+    lead.setAttribute('aria-labelledby', 'lead-title');
+    // экран успеха – в исходное состояние (после прошлой заявки)
+    $('[data-done-eyebrow]', done)!.textContent = 'Заявка готова';
+    $('[data-done-title]', done)!.textContent = 'Остался один шаг';
+    $('[data-done-text]', done)!.textContent = 'Отправьте заявку менеджеру в WhatsApp – сообщение уже заполнено.';
+    document.querySelectorAll<HTMLDialogElement>('dialog[open]').forEach((d) => d.close());
+    lead.showModal();
+  });
+
+  // маска телефона: +7 (999) 123-45-67
+  const phone = $<HTMLInputElement>('[data-phone]', form)!;
+  phone.addEventListener('input', () => {
+    let d = phone.value.replace(/\D/g, '');
+    if (d.startsWith('8')) d = '7' + d.slice(1);
+    if (!d.startsWith('7')) d = '7' + d;
+    d = d.slice(0, 11);
+    const p = [d.slice(1, 4), d.slice(4, 7), d.slice(7, 9), d.slice(9, 11)];
+    phone.value = '+7' + (p[0] ? ` (${p[0]}` : '') + (p[1] ? `) ${p[1]}` : '') + (p[2] ? `-${p[2]}` : '') + (p[3] ? `-${p[3]}` : '');
+  });
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const data = Object.fromEntries(new FormData(form)) as Record<string, string>;
+    const digits = (data.phone || '').replace(/\D/g, '');
+    const problem = !data.name?.trim() ? 'Укажите, как к вам обращаться' : digits.length !== 11 ? 'Проверьте номер телефона' : !data.consent ? 'Нужно согласие на обработку данных' : '';
+    err.textContent = problem;
+    err.hidden = !problem;
+    if (problem) return;
+
+    const text = [`Заявка на просмотр${data.car ? `: ${data.car}` : ''}`, `Имя: ${data.name}`, `Телефон: ${data.phone}`, `Когда: ${data.when}`, `Связь: ${data.contact}`].join('\n');
+    const endpoint = lead.dataset.endpoint;
+    const submit = form.querySelector<HTMLButtonElement>('[type=submit]')!;
+    let sent = false;
+    submit.disabled = true;
+    if (endpoint) {
+      try {
+        const r = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, page: location.href }) });
+        sent = r.ok;
+      } catch { sent = false; }
+    }
+    const wa = $<HTMLAnchorElement>('[data-done-wa]', done)!;
+    wa.href = `${lead.dataset.whatsapp}?text=${encodeURIComponent(text)}`;
+    wa.hidden = sent;
+    if (sent) {
+      $('[data-done-eyebrow]', done)!.textContent = 'Заявка принята';
+      $('[data-done-title]', done)!.textContent = `Спасибо, ${data.name.trim()}!`;
+      $('[data-done-text]', done)!.textContent = 'Менеджер свяжется с вами в ближайшее время и подтвердит время просмотра.';
+    }
+    submit.disabled = false;
+    form.hidden = true;
+    done.hidden = false;
+    lead.setAttribute('aria-labelledby', 'lead-done-title');
+    $<HTMLElement>('[data-done-title]', done)!.focus();
+    store.set('cd-lead');
+  });
+
+  // ── поп-апы Telegram: через 10 секунд и при уходе, каждый – раз за визит, не поверх других окон ──
+  const show = (id: string) => {
+    if (store.get(id) || store.get('cd-lead') || anyOpen()) return false;
+    $<HTMLDialogElement>(`#${id}`)?.showModal();
+    store.set(id);
+    return true;
+  };
+  setTimeout(() => show('tg-timer'), 10_000);
+
+  // уход на десктопе: курсор вылетел за верх окна
+  document.addEventListener('mouseout', (e) => {
+    if (!e.relatedTarget && e.clientY <= 0) show('tg-exit');
+  });
+  // уход на телефоне: резкая прокрутка вверх после того, как человек полистал страницу
+  const started = performance.now();
+  let anchorAt = 0, burstFrom = scrollY, burstAt = performance.now(), lastY = scrollY, deepest = 0;
+  document.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a[href*="#"]')) anchorAt = performance.now();
+  });
+  addEventListener('scroll', () => {
+    const now = performance.now();
+    deepest = Math.max(deepest, scrollY);
+    if (scrollY > lastY || now - burstAt > 450) { burstFrom = scrollY; burstAt = now; } // новый рывок
+    const up = burstFrom - scrollY;
+    lastY = scrollY;
+    if (!matchMedia('(hover: none)').matches || now - started < 20_000 || now - anchorAt < 2000) return;
+    if (deepest > innerHeight * 2 && up > innerHeight * 0.6 && now - burstAt < 450) show('tg-exit');
+  }, { passive: true });
+</script>
+
+<style is:global>
+  .modal {
+    width: min(480px, calc(100vw - 24px)); max-height: calc(100dvh - 24px); padding: 40px clamp(22px, 4vw, 40px) 32px;
+    border: 1px solid var(--line-2); border-radius: 18px; color: var(--text);
+    background: linear-gradient(180deg, #121514 0%, #0b0c0c 100%); overflow: auto; overscroll-behavior: contain;
+    text-align: center; box-shadow: 0 40px 120px rgba(0, 0, 0, 0.6);
+  }
+  .modal::backdrop { background: rgba(4, 5, 5, 0.72); backdrop-filter: blur(8px); }
+  .modal[open] { animation: modalIn 0.6s var(--ease) both; }
+  .modal[open]::backdrop { animation: fadeIn 0.4s ease both; }
+  @keyframes modalIn { from { opacity: 0; transform: translateY(24px) scale(0.98); } to { opacity: 1; transform: none; } }
+  @keyframes fadeIn { from { opacity: 0; } }
+  .modal__glow { position: absolute; inset: 0 0 auto; height: 260px; pointer-events: none; background: radial-gradient(60% 100% at 50% 0%, rgba(36, 73, 60, 0.75) 0%, transparent 70%); }
+  .modal > *:not(.modal__glow) { position: relative; }
+  .modal__close { position: absolute !important; top: 14px; right: 14px; width: 36px; height: 36px; display: grid; place-items: center; border-radius: 50%; color: var(--muted); transition: color 0.2s, background 0.2s; z-index: 2; }
+  .modal__close:hover { color: var(--text); background: rgba(255, 255, 255, 0.06); }
+  .modal__close svg { width: 18px; height: 18px; }
+  .modal__logo { width: 34px; height: 52px; margin: 0 auto 18px; }
+  .modal__logo svg { width: 100%; height: 100%; }
+  .modal__logo--big { width: 52px; height: 80px; margin-bottom: 22px; }
+  .modal__shine {
+    position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(105deg, transparent 38%, rgba(255, 255, 255, 0.95) 50%, transparent 62%) 0 0 / 300% 100% no-repeat;
+    -webkit-mask: var(--mark) center / contain no-repeat; mask: var(--mark) center / contain no-repeat;
+    animation: heroShine 3.6s var(--ease) 0.4s infinite;
+  }
+  @keyframes heroShine { 0% { background-position: 100% 0; } 60%, 100% { background-position: 0 0; } }
+  .modal__eyebrow { color: var(--accent); }
+  .modal__title { margin-top: 12px; font-size: clamp(24px, 3vw, 30px); line-height: 1.15; }
+  .modal__text { margin-top: 14px; font-size: 14px; color: #b9c2be; }
+  .modal__list { list-style: none; margin: 22px 0 0; padding: 0; text-align: left; border-top: 1px solid var(--line); }
+  .modal__list li { position: relative; padding: 12px 0 12px 22px; border-bottom: 1px solid var(--line); font-size: 13px; color: #c9cdcb; }
+  .modal__list li::before { content: ''; position: absolute; left: 0; top: 21px; width: 10px; height: 1px; background: var(--accent); }
+  .modal__cta { width: 100%; margin-top: 24px; }
+  .modal__cta + .modal__cta { margin-top: 10px; }
+  .modal__later { margin-top: 16px; font-size: 13px; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+  .modal__later:hover { color: var(--text); }
+
+  .lead { text-align: left; }
+  .lead .modal__logo, .lead .modal__eyebrow, .lead .modal__title, .lead .modal__text { text-align: center; }
+  .lead__car { margin: 14px auto 0; width: fit-content; max-width: 100%; padding: 8px 14px; border-radius: 999px; background: var(--green); border: 1px solid var(--green-2); font-size: 13px; text-align: center; }
+  .field { display: block; margin-top: 18px; }
+  .field span, .chips legend { display: block; font-size: 12px; color: var(--muted); margin-bottom: 8px; }
+  .field input {
+    width: 100%; height: 50px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--line-2);
+    background: rgba(255, 255, 255, 0.03); color: var(--text); font: inherit; font-size: 15px; transition: border-color 0.2s, background 0.2s;
+  }
+  .field input::placeholder { color: var(--dim); }
+  .field input:focus { outline: none; border-color: var(--accent); background: rgba(143, 199, 173, 0.05); }
+  .chips { border: 0; padding: 0; margin: 18px 0 0; display: flex; flex-wrap: wrap; gap: 8px; }
+  .chips legend { width: 100%; padding: 0; }
+  .chips label { cursor: pointer; }
+  .chips input { position: absolute; opacity: 0; pointer-events: none; }
+  .chips span { display: inline-flex; height: 36px; align-items: center; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line-2); font-size: 13px; color: #c9cdcb; transition: all 0.2s; }
+  .chips input:checked + span { background: var(--green-2); border-color: var(--green-2); color: #fff; }
+  .chips input:focus-visible + span { outline: 1px solid var(--accent); outline-offset: 2px; }
+  .consent { display: flex; gap: 10px; align-items: flex-start; margin-top: 20px; font-size: 12px; color: var(--muted); cursor: pointer; }
+  .consent input { margin-top: 2px; accent-color: var(--green-2); width: 16px; height: 16px; flex: none; }
+  .consent a { text-decoration: underline; text-underline-offset: 3px; }
+  .lead__error { margin-top: 14px; font-size: 13px; color: #e8a3a3; }
+  .lead__submit { width: 100%; margin-top: 22px; }
+  .lead__done .lead__submit + .lead__submit { margin-top: 10px; }
+  .lead__note { margin-top: 12px; font-size: 12px; text-align: center; }
+
+  @media (max-width: 600px) {
+    .modal { width: 100vw; max-width: 100vw; max-height: 92dvh; margin: auto 0 0; border-radius: 18px 18px 0 0; border-bottom: 0; padding-bottom: calc(28px + env(safe-area-inset-bottom)); }
+    .modal[open] { animation-name: sheetIn; }
+    @keyframes sheetIn { from { transform: translateY(100%); } to { transform: none; } }
+  }
+</style>
