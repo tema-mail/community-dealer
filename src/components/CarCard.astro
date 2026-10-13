@@ -1,37 +1,42 @@
 ---
-import { type Car, carName, formatPrice } from '../data/cars';
-import { img, url } from '../data/site';
+import { type Car, carName, carUrl, formatKm, formatPrice, photo } from '../data/cars';
 
 interface Props { car: Car; eager?: boolean }
 const { car, eager = false } = Astro.props;
-const photo = (n: number, w: number) => img(`cars/${car.slug}/${String(n).padStart(2, '0')}-${w}.webp`);
+const badge = car.used ? 'С пробегом' : car.status;
 ---
 <a
   class="card"
-  href={url(`catalog/${car.slug}/`)}
+  href={carUrl(car)}
   data-brand={car.brand}
+  data-model={car.model}
   data-body={car.body}
-  data-status={car.status}
+  data-status={car.used ? 'С пробегом' : car.status}
+  data-price={car.price}
+  data-year={car.year}
 >
   <div class="card__media">
     <img
-      src={photo(1, 800)}
-      srcset={`${photo(1, 800)} 800w, ${photo(1, 1600)} 1600w`}
+      src={photo(car, 1, 800)}
+      srcset={`${photo(car, 1, 800)} 800w, ${photo(car, 1, 1200)} 1200w`}
       sizes="(min-width: 1024px) 30vw, 50vw"
-      alt={`${carName(car)}, ${car.year}`}
+      alt={`${carName(car)} ${car.trim}, ${car.year}`}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"
     />
-    <img src={photo(2, 800)} alt="" loading="lazy" decoding="async" aria-hidden="true" />
-    <span class="card__badge caps">{car.status}</span>
+    {car.photos.length > 1 && <img src={photo(car, Math.min(3, car.photos.length), 800)} alt="" loading="lazy" decoding="async" aria-hidden="true" />}
+    <span class:list={['card__badge caps', { 'card__badge--muted': badge !== 'В наличии' }]}>{badge}</span>
     <span class="card__plus" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v16M4 12h16" /></svg>
     </span>
-    <span class="card__dots" aria-hidden="true">{Array.from({ length: Math.min(car.photos, 4) }, () => <i />)}</span>
+    <span class="card__dots" aria-hidden="true">{Array.from({ length: Math.min(car.photos.length, 4) }, () => <i />)}</span>
   </div>
   <div>
     <div class="card__name">{carName(car)}</div>
-    <div class="card__meta">{car.year} · {car.power} л.с. · {car.body.toLowerCase()} · новый</div>
+    {car.trim && <div class="card__trim">{car.trim}</div>}
+    <div class="card__meta">
+      {car.year} · {car.power} л.с. · {car.used && car.mileage ? formatKm(car.mileage) : car.body.toLowerCase()}
+    </div>
     <div class="card__price">{formatPrice(car.price)}</div>
   </div>
 </a>

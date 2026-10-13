@@ -1,0 +1,32 @@
+---
+// Каталоги по кузову (Внедорожники, Седаны…) и по маркам (Каталог Mercedes-Benz…) – один шаблон.
+import Base from '../../../layouts/Base.astro';
+import CatalogView from '../../../components/CatalogView.astro';
+import { bodyCatalogs, brandCatalogs, carsWord, type Car } from '../../../data/cars';
+
+export function getStaticPaths() {
+  return [
+    ...bodyCatalogs.map((c) => ({ params: { catalog: c.slug }, props: { title: c.title, lead: c.lead, cars: c.cars, facet: 'brand' as const } })),
+    ...brandCatalogs.map((c) => ({
+      params: { catalog: c.slug },
+      props: {
+        title: c.title,
+        lead: `${[...new Set(c.cars.map((x) => x.model))].join(', ')} – в наличии в Москве`,
+        cars: c.cars,
+        facet: 'model' as const,
+      },
+    })),
+  ];
+}
+
+const { title, lead, cars, facet } = Astro.props as { title: string; lead: string; cars: Car[]; facet: 'brand' | 'model' };
+const n = `${cars.length} ${carsWord(cars.length)}`;
+---
+<Base
+  title={`${title} в наличии в Москве – ${n} | Community Dealer`}
+  description={`${title}: ${n} в наличии в Москве. ${lead}. Сделки с НДС, лизинг, трейд-ин.`}
+  page="catalog"
+  solidHeader
+>
+  <CatalogView title={title} lead={lead} cars={cars} active={Astro.params.catalog!} facet={facet} />
+</Base>
