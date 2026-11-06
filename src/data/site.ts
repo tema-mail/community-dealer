@@ -4,7 +4,6 @@ export const site = {
   full: 'Community Dealer',
   phone: '+7 993 288-68-88',
   phoneHref: 'tel:+79932886888',
-  whatsapp: 'https://wa.me/79932886888',
   telegram: 'https://t.me/community_dealer',
   autoru: 'https://auto.ru/diler/cars/all/community_dealer_moskva/',
   address: 'Москва, Ленинградский проспект, 36 стр. 36',

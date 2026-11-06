@@ -4,7 +4,7 @@ import LogoMark from '../components/LogoMark.astro';
 import CarCard from '../components/CarCard.astro';
 import HeroSlider from '../components/HeroSlider';
 import { bodyCatalogs, brandCatalogs, cars, carsWord, photo } from '../data/cars';
-import { img, site, url } from '../data/site';
+import { img, url } from '../data/site';
 
 // обложки плиток каталогов: самые выразительные кадры каталога
 const covers: Record<string, string> = {
@@ -71,7 +71,7 @@ const services = [
         </p>
         <div class="hero-offer__cta">
           <a class="btn btn--solid" href={url('catalog/')}>Смотреть каталог</a>
-          <a class="btn" href={site.whatsapp} target="_blank" rel="noopener">Собрать под заказ</a>
+          <button type="button" class="btn" data-lead="" data-lead-kind="podbor">Собрать под заказ</button>
         </div>
       </div>
       <p class="hero-offer__credit caps">Porsche 911 Turbo S · Malachite Green · в наличии</p>
