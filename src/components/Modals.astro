@@ -115,6 +115,7 @@ const endpoint = import.meta.env.PUBLIC_LEAD_ENDPOINT ?? '';
 </dialog>
 
 <script>
+  import { leadFields } from '../lib/attribution';
   const $ = <T extends Element>(s: string, root: ParentNode = document) => root.querySelector<T>(s);
   const store = {
     get: (k: string) => { try { return sessionStorage.getItem(k); } catch { return null; } },
@@ -209,7 +210,7 @@ const endpoint = import.meta.env.PUBLIC_LEAD_ENDPOINT ?? '';
     submit.disabled = true;
     if (endpoint) {
       try {
-        const r = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, page: location.href }) });
+        const r = await fetch(endpoint, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ ...data, ...leadFields(), page: location.href }) });
         sent = r.ok;
       } catch { sent = false; }
     }
