@@ -37,7 +37,6 @@ const others = [
   ...cars.filter((c) => c.id !== car.id && c.model !== car.model && c.catalog === car.catalog),
 ].slice(0, 3);
 const half = Math.ceil(car.options.length / 2);
-const message = `Здравствуйте! Интересует ${full} ${car.year} за ${formatPrice(car.price)}.`;
 ---
 <Base
   title={`${full} ${car.year} – купить в Москве, ${formatPrice(car.price)} | Community Dealer`}
@@ -73,7 +72,7 @@ const message = `Здравствуйте! Интересует ${full} ${car.ye
 
         <div class="pdp__cta">
           <button type="button" class="btn btn--solid" data-lead={`${full} ${car.year}`}>Записаться на просмотр</button>
-          <button type="button" class="btn" data-tg-text={message}>Написать в Telegram</button>
+          <button type="button" class="btn" data-lead={`${full} ${car.year}`} data-lead-kind="vopros">Написать менеджеру</button>
         </div>
 
         <ul class="pdp__perks">
