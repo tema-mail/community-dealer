@@ -86,7 +86,7 @@ const cover = cars[0];
     </div>
 
     <div class="product-grid" data-grid>
-      {cars.map((car, i) => <CarCard car={car} eager={i < 3} />)}
+      {cars.map((car, i) => <CarCard car={car} eager={i < 3} flip={i % 2 === 0} />)}
       <a class="card card--cta" href={site.telegram} target="_blank" rel="noopener" data-cta>
         <div class="card__media">
           {cover && <img class="card--cta__bg" src={photo(cover, 2, 800)} alt="" loading="lazy" />}
@@ -112,6 +112,16 @@ const cover = cars[0];
   const empty = document.querySelector<HTMLElement>('[data-empty]');
   const state: Record<string, string> = {};
 
+  // стороны чередуются по видимым карточкам: первая передом направо, вторая налево и т. д.
+  const turn = () => {
+    let v = 0;
+    grid?.querySelectorAll<HTMLElement>('.card:not([data-cta])').forEach((card) => {
+      if (card.hidden) return;
+      card.classList.toggle('is-flip', card.dataset.sides === '2' && v % 2 === 0);
+      v++;
+    });
+  };
+
   const apply = () => {
     let shown = 0;
     cards.forEach((card) => {
@@ -121,6 +131,7 @@ const cover = cars[0];
     });
     if (count) count.textContent = `${shown} ${carsWord(shown)}`;
     if (empty) empty.hidden = shown > 0;
+    turn();
   };
 
   document.querySelectorAll<HTMLElement>('[data-filter]').forEach((group) => {
@@ -139,8 +150,13 @@ const cover = cars[0];
 
   document.querySelector<HTMLSelectElement>('[data-sort]')?.addEventListener('change', (e) => {
     const [key, dir] = (e.target as HTMLSelectElement).value.split('-');
-    const sorted = [...cards].sort((a, b) => (Number(a.dataset[key]) - Number(b.dataset[key])) * (dir === 'asc' ? 1 : -1));
+    // машины со слабой съёмкой остаются в конце при любой сортировке
+    const weak = (c: HTMLElement) => Number(c.dataset.weak === '1');
+    const sorted = [...cards].sort(
+      (a, b) => weak(a) - weak(b) || (Number(a.dataset[key]) - Number(b.dataset[key])) * (dir === 'asc' ? 1 : -1),
+    );
     sorted.forEach((c) => grid?.insertBefore(c, cta ?? null));
+    turn();
   });
 </script>
 

@@ -14,7 +14,7 @@
   --green-2: #24493c;
   --accent: #8fc7ad;
   --silver: linear-gradient(180deg, #ffffff 0%, #dcdfde 42%, #8a8f8d 100%);
-  --f-display: 'Unbounded', 'Manrope', system-ui, sans-serif;
+  --f-display: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f-body: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --gutter: clamp(16px, 4vw, 48px);
   --max: 1360px;
@@ -37,7 +37,7 @@ body {
 img { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
 button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; padding: 0; }
-h1, h2, h3 { margin: 0; font-weight: 300; font-family: var(--f-display); letter-spacing: -0.01em; }
+h1, h2, h3 { margin: 0; font-weight: 400; font-family: var(--f-display); letter-spacing: -0.01em; }
 p { margin: 0; }
 :focus-visible { outline: 1px solid var(--accent); outline-offset: 3px; }
 
@@ -156,19 +156,21 @@ p { margin: 0; }
 .product-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 28px 12px; }
 @media (min-width: 1024px) { .product-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 44px 24px; } }
 
-/* карточка товара в каталоге (как у BORK: высокая плитка, «+» в углу, подпись под ней) */
+/* карточка товара в каталоге (как у BORK: «+» в углу, подпись под плиткой).
+   Плитка 4:3 – как кадр дилера, поэтому машина видна целиком: перед и зад не обрезаются.
+   В кадре два вида: передом налево (--l) и направо (--r); is-flip показывает правый, наведение – другой. */
 .card { display: flex; flex-direction: column; gap: 14px; }
 .card__media {
-  position: relative; aspect-ratio: 4 / 5; border-radius: var(--radius); overflow: hidden;
+  position: relative; aspect-ratio: 4 / 3; border-radius: var(--radius); overflow: hidden;
   background: var(--card);
 }
 .card__media img {
   position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover;
-  transition: opacity 0.6s var(--ease), transform 1.2s var(--ease);
+  transition: opacity 0.6s var(--ease);
 }
-.card__media img + img { opacity: 0; }
-.card:hover .card__media img:first-child { transform: scale(1.04); }
-.card:hover .card__media img + img { opacity: 1; }
+.card__view--r { opacity: 0; }
+.card:hover .card__view--r, .card.is-flip .card__view--r { opacity: 1; }
+.card.is-flip:hover .card__view--r { opacity: 0; }
 .card__media::after {
   content: ''; position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(180deg, rgba(11, 12, 12, 0.35) 0%, transparent 22%, transparent 70%, rgba(11, 12, 12, 0.55) 100%);
@@ -209,6 +211,8 @@ p { margin: 0; }
   background: radial-gradient(120% 80% at 100% 0%, var(--green-2) 0%, var(--green) 45%, var(--card) 100%);
 }
 .card--cta .card__media::after { display: none; }
+/* плитка 4:3 мала для текста: служебная карточка тянется на высоту соседней карточки с подписью */
+.card--cta .card__media { aspect-ratio: auto; flex: 1; min-height: 170px; }
 .card--cta h3 { font-size: clamp(16px, 1.8vw, 22px); line-height: 1.25; }
 .card--cta p { color: #b9c2be; font-size: 13px; margin-top: 12px; max-width: 34em; }
 @media (min-width: 1024px) {

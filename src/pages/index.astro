@@ -3,7 +3,7 @@ import Base from '../layouts/Base.astro';
 import LogoMark from '../components/LogoMark.astro';
 import CarCard from '../components/CarCard.astro';
 import HeroSlider from '../components/HeroSlider';
-import { bodyCatalogs, brandCatalogs, cars, carsWord, photo } from '../data/cars';
+import { bodyCatalogs, brandCatalogs, cars, carsWord, photo, views } from '../data/cars';
 import { img, url } from '../data/site';
 
 // обложки плиток каталогов: самые выразительные кадры каталога
@@ -52,16 +52,7 @@ const services = [
     </div>
 
     <div slot="s2" class="hero-offer">
-      <picture class="hero-offer__bg">
-        <img
-          src={img('hero-headlight-1200.webp')}
-          srcset={`${img('hero-headlight-1200.webp')} 1200w, ${img('hero-headlight-2400.webp')} 2400w`}
-          sizes="100vw"
-          alt="Фара Porsche 911 Turbo S в цвете Malachite Green крупным планом"
-          fetchpriority="high"
-        />
-      </picture>
-      <div class="hero-offer__shade" aria-hidden="true"></div>
+      <div class="hero-logo__glow hero-offer__glow" aria-hidden="true"></div>
       <div class="wrap hero-offer__inner">
         <p class="caps hero-offer__eyebrow">Mercedes-Benz · Porsche · Ferrari · Range Rover</p>
         <h1 class="hero-offer__title">Премиальные автомобили <span class="chrome">в наличии и под&nbsp;заказ</span></h1>
@@ -74,7 +65,6 @@ const services = [
           <button type="button" class="btn" data-lead="" data-lead-kind="podbor">Собрать под заказ</button>
         </div>
       </div>
-      <p class="hero-offer__credit caps">Porsche 911 Turbo S · Malachite Green · в наличии</p>
     </div>
   </HeroSlider>
 
@@ -119,7 +109,7 @@ const services = [
           const cover = cars.find((x) => x.id === covers[c.slug]) ?? c.cars[0];
           return (
             <a class="tile reveal" href={url(`catalog/${c.slug}/`)} style={`transition-delay:${i * 70}ms`}>
-              <img src={photo(cover, 1, 800)} alt="" loading="lazy" decoding="async" />
+              <img src={photo(cover, views(cover)[i % 2 === 0 ? 1 : 0], 800)} alt="" loading="lazy" decoding="async" />
               <span class="tile__text">
                 <span class="tile__title">{c.title}</span>
                 <span class="tile__count">{c.cars.length} {carsWord(c.cars.length)}</span>
@@ -139,7 +129,7 @@ const services = [
       </div>
 
       <div class="product-grid stock__grid">
-        {picks.map((car) => <div class="reveal"><CarCard car={car} /></div>)}
+        {picks.map((car, i) => <div class="reveal"><CarCard car={car} flip={i % 2 === 0} /></div>)}
       </div>
       <div class="stock__more reveal">
         <a class="btn" href={url('catalog/')}>Смотреть все {cars.length} {carsWord(cars.length)}</a>
@@ -204,19 +194,8 @@ const services = [
   .hero-logo__word { position: relative; margin-top: clamp(28px, 5vh, 48px); font: 300 clamp(30px, 7.4vw, 104px)/1 var(--f-display); letter-spacing: 0.3em; padding-left: 0.3em; }
   .hero-logo__sub { position: relative; margin-top: 22px; color: var(--muted); letter-spacing: 0.5em; padding-left: 0.5em; }
 
-  /* слайд 2: оффер на крупном плане фары */
+  /* слайд 2: оффер на том же фоне, что и знак Community */
   .hero-offer { position: relative; display: flex; align-items: center; }
-  .hero-offer__bg { position: absolute; inset: 0; }
-  .hero-offer__bg img { width: 100%; height: 100%; object-fit: cover; object-position: 62% 50%; transform: scale(1.02); }
-  .is-active .hero-offer__bg img { animation: heroZoom 14s linear forwards; }
-  @keyframes heroZoom { from { transform: scale(1.02); } to { transform: scale(1.2) translateX(-2%); } }
-  .hero-offer__shade {
-    position: absolute; inset: 0;
-    background:
-      linear-gradient(90deg, rgba(5, 6, 6, 0.92) 0%, rgba(5, 6, 6, 0.7) 34%, rgba(5, 6, 6, 0.05) 70%),
-      linear-gradient(0deg, rgba(5, 6, 6, 0.85) 0%, transparent 35%),
-      linear-gradient(180deg, rgba(5, 6, 6, 0.7) 0%, transparent 20%);
-  }
   .hero-offer__inner { position: relative; padding-top: 80px; padding-bottom: 80px; }
   .hero-offer__eyebrow { color: var(--accent); }
   .hero-offer__title .chrome { display: block; }
@@ -228,7 +207,6 @@ const services = [
   .is-active .hero-offer__inner > :nth-child(2) { animation-delay: 0.12s; }
   .is-active .hero-offer__inner > :nth-child(3) { animation-delay: 0.24s; }
   .is-active .hero-offer__inner > :nth-child(4) { animation-delay: 0.36s; }
-  .hero-offer__credit { position: absolute; right: var(--gutter); top: 130px; color: rgba(255, 255, 255, 0.55); writing-mode: vertical-rl; letter-spacing: 0.24em; }
 
   @media (max-width: 860px) {
     .hero__ui { align-items: flex-end; gap: 16px; }
@@ -237,13 +215,10 @@ const services = [
     .hero__nav { display: none; }
     .hero__arrows .icon-btn { width: 36px; height: 36px; }
     .hero-offer { align-items: flex-end; }
-    .hero-offer__bg img { object-position: 70% 50%; }
-    .hero-offer__shade { background: linear-gradient(0deg, rgba(5, 6, 6, 0.96) 0%, rgba(5, 6, 6, 0.75) 48%, rgba(5, 6, 6, 0.1) 80%); }
     .hero-offer__inner { padding-bottom: 120px; }
     .hero-offer__eyebrow { letter-spacing: 0.1em; font-size: 10px; }
     .hero-offer__cta { display: grid; grid-template-columns: 1fr; }
     .hero-offer__cta .btn { width: 100%; }
-    .hero-offer__credit { display: none; }
   }
 
   /* ── блок 2: как работаем ── */
@@ -268,10 +243,9 @@ const services = [
 
   .stock { padding-top: 40px; }
   .tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
-  .tile { position: relative; display: block; aspect-ratio: 4 / 5; border-radius: var(--radius); overflow: hidden; background: var(--card); }
-  .tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform 1.2s var(--ease); }
+  .tile { position: relative; display: block; aspect-ratio: 4 / 3; border-radius: var(--radius); overflow: hidden; background: var(--card); }
+  .tile img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; } /* кадр 4:3 целиком – машина не обрезается */
   .tile::after { content: ''; position: absolute; inset: 0; background: linear-gradient(0deg, rgba(5, 6, 6, 0.85) 0%, rgba(5, 6, 6, 0.1) 55%); }
-  .tile:hover img { transform: scale(1.05); }
   .tile__text { position: absolute; left: 16px; right: 56px; bottom: 16px; z-index: 1; display: grid; gap: 4px; }
   .tile__title { font: 300 clamp(17px, 1.8vw, 24px)/1.15 var(--f-display); }
   .tile__count { font-size: 12px; color: #b9c2be; }
@@ -284,5 +258,5 @@ const services = [
   .brands__item:hover { background: var(--green-2); border-color: var(--green-2); }
   .brands__item:hover i { color: #b9d8c9; }
   .stock__more { display: flex; justify-content: center; margin-top: 48px; }
-  @media (min-width: 1024px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; } .tile { aspect-ratio: 3 / 4; } }
+  @media (min-width: 1024px) { .tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; } }
 </style>

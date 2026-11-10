@@ -1,12 +1,14 @@
 ---
-import { type Car, carName, carUrl, formatKm, formatPrice, photo } from '../data/cars';
+import { type Car, carName, carUrl, formatKm, formatPrice, isWeak, photo, views } from '../data/cars';
 
-interface Props { car: Car; eager?: boolean }
-const { car, eager = false } = Astro.props;
+interface Props { car: Car; eager?: boolean; /** машина передом направо (чередование в сетке) */ flip?: boolean }
+const { car, eager = false, flip = false } = Astro.props;
+const [left, right] = views(car);
+const twoSides = left !== right;
 const badge = car.used ? 'С пробегом' : car.status;
 ---
 <a
-  class="card"
+  class:list={['card', { 'is-flip': flip && twoSides }]}
   href={carUrl(car)}
   data-brand={car.brand}
   data-model={car.model}
@@ -14,17 +16,32 @@ const badge = car.used ? 'С пробегом' : car.status;
   data-status={car.used ? 'С пробегом' : car.status}
   data-price={car.price}
   data-year={car.year}
+  data-weak={isWeak(car) ? '1' : undefined}
+  data-sides={twoSides ? '2' : '1'}
 >
   <div class="card__media">
+    {/* весь кадр 4:3 без обрезки: машина видна целиком, перед и зад */}
     <img
-      src={photo(car, 1, 800)}
-      srcset={`${photo(car, 1, 800)} 800w, ${photo(car, 1, 1200)} 1200w`}
+      class="card__view card__view--l"
+      src={photo(car, left, 800)}
+      srcset={`${photo(car, left, 800)} 800w, ${photo(car, left, 1200)} 1200w`}
       sizes="(min-width: 1024px) 30vw, 50vw"
       alt={`${carName(car)} ${car.trim}, ${car.year}`}
       loading={eager ? 'eager' : 'lazy'}
       decoding="async"
     />
-    {car.photos.length > 1 && <img src={photo(car, Math.min(3, car.photos.length), 800)} alt="" loading="lazy" decoding="async" aria-hidden="true" />}
+    {twoSides && (
+      <img
+        class="card__view card__view--r"
+        src={photo(car, right, 800)}
+        srcset={`${photo(car, right, 800)} 800w, ${photo(car, right, 1200)} 1200w`}
+        sizes="(min-width: 1024px) 30vw, 50vw"
+        alt=""
+        aria-hidden="true"
+        loading={eager ? 'eager' : 'lazy'}
+        decoding="async"
+      />
+    )}
     <span class:list={['card__badge caps', { 'card__badge--muted': badge !== 'В наличии' }]}>{badge}</span>
     <span class="card__plus" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 4v16M4 12h16" /></svg>

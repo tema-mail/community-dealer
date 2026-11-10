@@ -2,7 +2,7 @@
 import Base from '../../../layouts/Base.astro';
 import CarCard from '../../../components/CarCard.astro';
 import Gallery from '../../../components/Gallery';
-import { cars, carName, fullName, formatKm, formatPrice, photo, type Car, bodyCatalogs } from '../../../data/cars';
+import { cars, carName, isWeak, fullName, formatKm, formatPrice, photo, type Car, bodyCatalogs } from '../../../data/cars';
 import { url } from '../../../data/site';
 
 export function getStaticPaths() {
@@ -31,11 +31,13 @@ const specs: [string, string | null | undefined][] = [
   ['Салон', car.interior],
   ['Транспортный налог', car.tax ? `${formatPrice(car.tax)} в год` : null],
 ];
-// похожие: сначала та же модель, потом тот же кузов
+// похожие: сначала та же модель, потом тот же кузов; машины со слабой съёмкой – только если больше нечего показать
 const others = [
   ...cars.filter((c) => c.id !== car.id && c.model === car.model),
   ...cars.filter((c) => c.id !== car.id && c.model !== car.model && c.catalog === car.catalog),
-].slice(0, 3);
+]
+  .sort((a, b) => Number(isWeak(a)) - Number(isWeak(b)))
+  .slice(0, 3);
 const half = Math.ceil(car.options.length / 2);
 ---
 <Base
@@ -110,7 +112,7 @@ const half = Math.ceil(car.options.length / 2);
           <a class="link-arrow caps" href={url(`catalog/${bodyCatalog.slug}/`)}>{bodyCatalog.title}</a>
         </div>
         <div class="product-grid">
-          {others.map((c) => <CarCard car={c} />)}
+          {others.map((c, i) => <CarCard car={c} flip={i % 2 === 0} />)}
         </div>
       </section>
     )}
